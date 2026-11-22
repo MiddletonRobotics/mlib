@@ -1,0 +1,40 @@
+plugins {
+	id 'com.android.library'
+	id 'maven-publish'
+}
+
+android {
+	namespace 'org.middletonrobotics.mlib'
+	compileSdk 30
+	defaultConfig {
+		minSdk 24
+	}
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_1_8
+		targetCompatibility JavaVersion.VERSION_1_8
+	}
+	publishing {
+		singleVariant('release') {
+			withSourcesJar()
+		}
+	}
+}
+
+dependencies {
+	compileOnly "org.firstinspires.ftc:RobotCore:12.0.0"
+    compileOnly "org.firstinspires.ftc:Hardware:12.0.0"
+    compileOnly "org.firstinspires.ftc:FtcCommon:12.0.0"
+}
+
+afterEvaluate {
+	publishing {
+		publications {
+			release(MavenPublication) {
+				from components.release
+				groupId = 'com.github.MiddletonRobotics'
+				artifactId = 'mlib'
+				version = '0.1.0'
+			}
+		}
+	}
+}
