@@ -1,0 +1,33 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4   # caches Gradle so builds are faster
+      - name: Build (same command JitPack runs)
+        run: ./gradlew :mlib:publishToMavenLocal
+
+  warm-jitpack:
+    # After a release tag passes the build, ask JitPack for the artifact
+    # so it builds right away, instead of on the first team's sync
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger JitPack build
+        run: |
+          curl -sS --max-time 900 \
+            "https://jitpack.io/com/github/${{ github.repository }}/${{ github.ref_name }}/mlib-${{ github.ref_name }}.pom" || true
